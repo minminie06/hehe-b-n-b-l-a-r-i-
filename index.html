@@ -1,87 +1,82 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haha!Bạn đã bị lừa!</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haha!Bạn đã bị lừa!</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
 
-        #container {
-            /* Đảm bảo container căn giữa các phần tử con */
-            display: flex;
-            flex-direction: column; /* Xếp các phần tử theo chiều dọc */
-            align-items: center;
-        }
+        #container {
+            /* Đảm bảo container căn giữa các phần tử con */
+            display: flex;
+            flex-direction: column; /* Xếp các phần tử theo chiều dọc */
+            align-items: center; /* Căn giữa theo chiều ngang */
+            justify-content: center; /* Căn giữa theo chiều dọc nếu container có chiều cao cố định */
+        }
 
-        .main-title {
-            color: #d9534f; /* Màu đỏ nổi bật */
-            font-size: 3em;
-            margin-bottom: 5px; /* Giảm khoảng cách với dòng dưới */
-            animation: bounce 1s infinite;
-        }
+        .main-title {
+            color: #d9534f; /* Màu đỏ nổi bật */
+            font-size: 5em; /* Phóng to */
+            margin-bottom: 10px; /* Khoảng cách với dòng dưới */
+            animation: bounce 1s infinite; /* Hiệu ứng rung lắc */
+            font-weight: bold; /* In đậm */
+        }
 
-        .small-text {
-            color: black; /* Màu đen */
-            font-size: 1.2em; /* Kích thước nhỏ hơn */
-            margin-top: 0; /* Loại bỏ margin trên */
-        }
-        /* Hiệu ứng JavaScript sẽ thêm đoạn văn bản này */
-        #thong_diep {
-            font-size: 5em;
-            font-weight: bold;
-        }
+        .small-text {
+            color: black; /* Màu đen */
+            font-size: 1.5em; /* Kích thước nhỏ hơn nhưng vẫn dễ đọc */
+            margin-top: 0; /* Loại bỏ margin trên */
+        }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-
-            40% {
-                transform: translateY(-30px);
-            }
-
-            60% {
-                transform: translateY(-15px);
-            }
-        }
-    </style>
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px); /* Rung lên */
+            }
+            60% {
+                transform: translateY(-10px); /* Rung xuống nhẹ */
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <div id="container">
-    </div>
+    <div id="container">
+    </div>
 
-    <script>
-        // Lấy phần tử HTML có ID là 'container'
-        const container = document.getElementById('container');
+    <script>
+        // Lấy phần tử HTML có ID là 'container'
+        const container = document.getElementById('container');
 
-        // 1. Tạo và thiết lập thẻ <h1> (dòng chữ đỏ)
-        const mainMessageElement = document.createElement('h1');
-        mainMessageElement.textContent = "Chúc mừng bạn đã trúng thưởng!";
-        mainMessageElement.classList.add('main-title'); // Thêm class để áp dụng CSS
+        // 1. Tạo và thiết lập thẻ <h1> (dòng chữ đỏ lớn, rung lắc)
+        const mainMessageElement = document.createElement('h1');
+        mainMessageElement.textContent = "Chúc mừng bạn đã trúng thưởng!";
+        mainMessageElement.classList.add('main-title'); // Áp dụng class CSS
 
-        // 2. Tạo và thiết lập thẻ <p> (dòng chữ đen nhỏ)
-        const smallTextElement = document.createElement('p');
-        smallTextElement.textContent = "hehe bạn bị lừa rùi:))))";
-        smallTextElement.classList.add('small-text'); // Thêm class để áp dụng CSS
+        // 2. Tạo và thiết lập thẻ <p> (dòng chữ đen nhỏ)
+        const smallTextElement = document.createElement('p');
+        smallTextElement.textContent = "hehe bạn bị lừa rùi:))))";
+        smallTextElement.classList.add('small-text'); // Áp dụng class CSS
 
-        // 3. Thêm các thẻ vào container theo thứ tự
-        container.appendChild(mainMessageElement);
-        container.appendChild(smallTextElement);
+        // 3. Thêm các thẻ vào container theo thứ tự
+        container.appendChild(mainMessageElement);
+        container.appendChild(smallTextElement);
 
-        // (Tùy chọn) Thêm thông báo vào console để thêm phần vui vẻ
-        console.log("Tìm kiếm lỗi à? Không có gì đâu, hehe!");
-    </script>
+        // (Tùy chọn) Thêm thông báo vào console để thêm phần vui vẻ
+        console.log("Tìm kiếm lỗi à? Không có gì đâu, hehe!");
+    </script>
 
 </body>
 </html>
