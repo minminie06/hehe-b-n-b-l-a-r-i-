@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Haha!Bạn đã bị lừa!</title>
     <style>
+        /* CSS CHUNG */
         body {
             display: flex;
             justify-content: center;
@@ -14,41 +15,100 @@
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
             text-align: center;
+            overflow: hidden; /* Ngăn cuộn do pháo hoa */
+            position: relative; /* Quan trọng để pháo hoa định vị tuyệt đối */
         }
 
         #container {
-            /* Đảm bảo container căn giữa các phần tử con */
             display: flex;
-            flex-direction: column; /* Xếp các phần tử theo chiều dọc */
-            align-items: center; /* Căn giữa theo chiều ngang */
+            flex-direction: column; 
+            align-items: center; 
             justify-content: center;
+            z-index: 10; /* Đảm bảo chữ nằm trên pháo hoa */
+            position: relative;
         }
 
+        /* DÒNG CHỮ ĐỎ LỚN (Rung lắc) */
         .main-title {
-            color: #d9534f; /* Màu đỏ nổi bật */
-            font-size: 5em; /* Phóng to */
+            color: #d9534f; 
+            font-size: 5em; 
             font-weight: bold;
-            margin-bottom: 30px; /* <--- Đã TĂNG khoảng cách dưới */
-            animation: bounce 1s infinite; /* Hiệu ứng rung lắc */
+            margin-bottom: 30px; 
+            animation: bounce 1s infinite; 
         }
 
+        /* DÒNG CHỮ ĐEN NHỎ (Nghiêng) */
         .small-text {
-            color: black; /* Màu đen */
-            font-size: 1em; /* <--- Đã LÀM NHỎ HƠN (từ 1.5em xuống 1em) */
+            color: black; 
+            font-size: 1em; 
             margin-top: 0; 
-            font-style: italic; /* <--- Đã THÊM kiểu chữ nghiêng */
+            font-style: italic; 
         }
 
+        /* HIỆU ỨNG RUNG LẮC (Bounce) */
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% {
                 transform: translateY(0);
             }
             40% {
-                transform: translateY(-20px); /* Rung lên */
+                transform: translateY(-20px); 
             }
             60% {
-                transform: translateY(-10px); /* Rung xuống nhẹ */
+                transform: translateY(-10px); 
             }
+        }
+
+        /* --- HIỆU ỨNG PHÁO HOA --- */
+
+        /* Định nghĩa hiệu ứng Pháo hoa bắn lên và nổ (Firework) */
+        @keyframes firework {
+            0% {
+                bottom: 0;
+                opacity: 0;
+                transform: translateX(0);
+            }
+            10% {
+                opacity: 1;
+            }
+            50% {
+                bottom: 50%; /* Lên giữa màn hình */
+                opacity: 1;
+            }
+            60% {
+                /* Hiệu ứng nổ bắt đầu */
+                transform: scale(20) rotate(45deg); 
+                opacity: 0;
+            }
+            100% {
+                transform: scale(20) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* Tạo hai hiệu ứng Pháo hoa sử dụng ::before và ::after trên body */
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #ffeb3b; /* Màu vàng */
+            border-radius: 50%;
+            animation: firework 3s infinite ease-out; /* Pháo hoa 3 giây */
+            z-index: 5; 
+        }
+
+        /* Pháo hoa bên trái */
+        body::before {
+            left: 5%; /* Vị trí bắt đầu bên trái */
+            bottom: 0;
+        }
+
+        /* Pháo hoa bên phải */
+        body::after {
+            right: 5%; /* Vị trí bắt đầu bên phải */
+            bottom: 0;
+            background: #03a9f4; /* Màu xanh lam khác biệt */
+            animation-delay: 1.5s; /* Bắn sau 1.5 giây so với cái đầu tiên */
         }
     </style>
 </head>
