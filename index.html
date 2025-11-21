@@ -1,512 +1,124 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Bạn đã bị lừa! (Kèm Pháo hoa)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#000000">
-  <link href="https://fonts.googleapis.com/css?family=Russo+One" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
-  
-  <style>
-    /* CSS CỦA HIỆU ỨNG PHÁO HOA GỐC (Được nén lại) */
-    html { box-sizing: border-box; background-color: #000; }
-    *, *::before, *::after { box-sizing: inherit; }
-    body {
-        margin: 0;
-        overflow: hidden;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        height: 100vh;
-        position: relative;
-        /* Đảm bảo nội dung của bạn được căn giữa nếu không có pháo hoa */
-        display: flex; /* Dùng flexbox để căn giữa nội dung */
-        justify-content: center; /* Căn giữa ngang */
-        align-items: center; /* Căn giữa dọc */
-    }
-    .container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
-    .loading-init {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        background-color: #000;
-        color: #fff;
-        text-transform: uppercase;
-        font-family: 'Russo One', sans-serif;
-        font-size: 14px;
-        transition: opacity 0.5s;
-        z-index: 100; /* Z-index gốc */
-    }
-    .loading-init.remove { opacity: 0; pointer-events: none; }
-    .stage-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; transition: opacity 1s; }
-    .stage-container.remove { opacity: 1; }
-    .canvas-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
-    #trails-canvas, #main-canvas { position: absolute; width: 100%; height: 100%; top: 0; left: 0; cursor: crosshair; }
-    .controls { position: absolute; top: 10px; right: 10px; display: flex; z-index: 10; }
-    .btn {
-      width: 44px;
-      height: 44px;
-      margin-left: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(255, 255, 255, 0.2);
-      border-radius: 5px;
-      cursor: pointer;
-      opacity: 0.8;
-      transition: opacity 0.3s, background-color 0.3s;
-    }
-    .btn:hover { opacity: 1; background-color: rgba(255, 255, 255, 0.3); }
-    .menu { /* ... (CSS menu) ... */ z-index: 110; }
-    .menu__inner-wrap { padding: 30px; max-width: 300px; height: 100%; margin: 0 0 0 auto; border-left: 2px solid rgba(255, 255, 255, 0.2); background-color: rgba(0, 0, 0, 0.95); position: relative; }
-    .menu__header { font-size: 20px; text-align: center; margin-bottom: 5px; }
-    .menu__subheader { font-size: 14px; text-align: center; margin-bottom: 20px; color: #aaa; }
-    .close-menu-btn { position: absolute; top: 10px; left: 10px; z-index: 1; }
-    .form-option { margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 5px; }
-    .form-option--select label { display: block; margin-bottom: 5px; font-size: 12px; color: #ccc; cursor: help; }
-    .form-option--select select {
-      width: 100%; padding: 8px; background-color: #333; color: #fff; border: none; border-radius: 3px;
-      font-family: 'Russo One', sans-serif; font-size: 14px; -webkit-appearance: none; -moz-appearance: none;
-      appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-      background-repeat: no-repeat; background-position: right 8px top 50%; background-size: 18px; cursor: pointer;
-    }
-    .form-option--checkbox label { font-size: 14px; display: flex; align-items: center; cursor: pointer; }
-    .form-option--checkbox input[type="checkbox"] { margin-right: 10px; width: 20px; height: 20px; cursor: pointer; }
-    .credits { margin-top: 30px; font-size: 12px; text-align: center; color: #aaa; }
-    .help-modal { /* ... (CSS help modal) ... */ z-index: 120; }
-    .help-modal.show { opacity: 1; pointer-events: all; }
-    .help-modal__overlay { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: rgba(0, 0, 0, 0.7); }
-    .help-modal__dialog { background-color: #111; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); max-width: 400px; width: 90%; position: relative; z-index: 1; color: #fff; font-family: Arial, sans-serif; }
-    .help-modal__header { font-size: 20px; margin-bottom: 10px; color: #ff9800; }
-    .help-modal__body { font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
-    .help-modal__close-btn { padding: 10px 20px; background-color: #555; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-family: 'Russo One', sans-serif; transition: background-color 0.3s; }
-    .help-modal__close-btn:hover { background-color: #777; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bạn đã bị lừa! Kèm Pháo hoa Đơn giản</title>
+    <link href="https://fonts.googleapis.com/css?family=Russo+One" rel="stylesheet">
+    <style>
+        /* CSS CHUNG */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000; /* Nền đen để pháo hoa nổi bật */
+            font-family: Arial, sans-serif;
+            text-align: center;
+            overflow: hidden; 
+            position: relative; 
+        }
 
-    /* --- CSS TÙY CHỈNH CHO NỘI DUNG CỦA BẠN (Đã kiểm tra Z-index và Font) --- */
-    #custom-message {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        z-index: 101; /* Đảm bảo nằm trên loading-init (100) */
-        padding: 20px;
-        pointer-events: none; /* Cho phép tương tác với pháo hoa bên dưới */
-        width: 100%; 
-        max-width: 800px; /* Giới hạn chiều rộng để chữ không quá to trên màn hình rộng */
-    }
+        #container {
+            display: flex;
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            z-index: 10; /* Đảm bảo chữ nằm trên pháo hoa */
+            position: relative;
+        }
 
-    .main-title {
-        color: #d9534f; /* Màu đỏ nổi bật */
-        font-size: 5em; 
-        font-weight: bold;
-        margin-bottom: 30px; 
-        animation: bounce 1s infinite; 
-        font-family: 'Russo One', sans-serif; /* Đảm bảo dùng font này */
-        line-height: 1.1; 
-    }
+        /* DÒNG CHỮ ĐỎ LỚN (Rung lắc) */
+        .main-title {
+            color: #d9534f; /* Màu đỏ nổi bật */
+            font-size: 5em; /* Phóng to */
+            font-weight: bold;
+            margin-bottom: 30px; 
+            animation: bounce 1s infinite; /* Hiệu ứng rung lắc */
+            font-family: 'Russo One', sans-serif; /* <--- KHẮC PHỤC: Dùng font Russo One */
+            line-height: 1.1; 
+        }
 
-    .small-text {
-        color: white; /* Màu trắng cho dễ nhìn trên nền đen */
-        font-size: 1.2em; 
-        margin-top: 0; 
-        font-style: italic; 
-        font-family: Arial, sans-serif; 
-        text-shadow: 0 0 8px rgba(0, 0, 0, 0.7); /* Thêm bóng để nổi bật hơn */
-    }
+        /* DÒNG CHỮ ĐEN NHỎ (Nghiêng) */
+        .small-text {
+            color: white; /* Màu trắng cho dễ đọc trên nền đen */
+            font-size: 1.2em; 
+            margin-top: 0; 
+            font-style: italic; 
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Tạo bóng sáng */
+        }
 
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-        40% { transform: translateY(-20px); }
-        60% { transform: translateY(-10px); }
-    }
-  </style>
+        /* HIỆU ỨNG RUNG LẮC (Bounce) */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
 
+        /* --- HIỆU ỨNG PHÁO HOA CSS ĐƠN GIẢN --- */
+
+        @keyframes firework {
+            0% { bottom: 0; opacity: 0; transform: scale(1); }
+            10% { opacity: 1; }
+            50% { bottom: 60%; opacity: 1; transform: scale(1); }
+            70% { 
+                /* Hiệu ứng nổ */
+                transform: scale(25) rotate(45deg); 
+                opacity: 0;
+                box-shadow: 0 0 100px 5px currentColor;
+            }
+            100% { transform: scale(25) rotate(45deg); opacity: 0; }
+        }
+
+        /* Tạo 4 pháo hoa ở hai bên */
+        .firework {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: currentColor;
+            border-radius: 50%;
+            z-index: 5; 
+        }
+        
+        /* Pháo hoa 1 (Trái, Vàng) */
+        .firework:nth-child(1) {
+            left: 15%; color: #ffeb3b; 
+            animation: firework 2s infinite ease-out; 
+            animation-delay: 0s;
+        }
+        /* Pháo hoa 2 (Phải, Xanh) */
+        .firework:nth-child(2) {
+            right: 15%; color: #03a9f4; 
+            animation: firework 2s infinite ease-out; 
+            animation-delay: 1s;
+        }
+        /* Pháo hoa 3 (Trái giữa, Đỏ) */
+        .firework:nth-child(3) {
+            left: 30%; color: #f44336; 
+            animation: firework 3s infinite ease-out; 
+            animation-delay: 0.5s;
+        }
+        /* Pháo hoa 4 (Phải giữa, Tím) */
+        .firework:nth-child(4) {
+            right: 30%; color: #9c27b0; 
+            animation: firework 3s infinite ease-out; 
+            animation-delay: 2s;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  
-  <div id="custom-message">
-    <h1 class="main-title">Chúc mừng bạn đã trúng thưởng!</h1>
-    <p class="small-text">hehe bạn bị lừa rùi:))))</p>
-  </div>
 
-  <div class="loading-init">
-    <div class="loading-init__header">Loading</div>
-    <div class="loading-init__status">Assembling Shells</div>
-  </div>
-  <div class="stage-container remove">
-    <div class="canvas-container">
-      <canvas id="trails-canvas"></canvas>
-      <canvas id="main-canvas"></canvas>
+    <div class="firework"></div>
+    <div class="firework"></div>
+    <div class="firework"></div>
+    <div class="firework"></div>
+
+    <div id="container">
+        <h1 class="main-title">Chúc mừng bạn đã trúng thưởng!</h1>
+        <p class="small-text">hehe bạn bị lừa rùi:))))</p>
     </div>
-    <div class="controls">
-      <div class="btn pause-btn">
-        <svg fill="white" width="24" height="24"><use href="#icon-pause" xlink:href="#icon-pause"></use></svg>
-      </div>
-      <div class="btn sound-btn">
-        <svg fill="white" width="24" height="24"><use href="#icon-sound-off" xlink:href="#icon-sound-off"></use></svg>
-      </div>
-      <div class="btn settings-btn">
-        <svg fill="white" width="24" height="24"><use href="#icon-settings" xlink:href="#icon-settings"></use></svg>
-      </div>
-    </div>
-    <div class="menu hide">
-      <div class="menu__inner-wrap">
-        <div class="btn btn--bright close-menu-btn">
-          <svg fill="white" width="24" height="24"><use href="#icon-close" xlink:href="#icon-close"></use></svg>
-        </div>
-        <div class="menu__header">Settings</div>
-        <div class="menu__subheader">For more info, click any label.</div>
-        <form>
-          <div class="form-option form-option--select">
-            <label class="shell-type-label">Shell Type</label>
-            <select class="shell-type"></select>
-          </div>
-          <div class="form-option form-option--select">
-            <label class="shell-size-label">Shell Size</label>
-            <select class="shell-size"></select>
-          </div>
-          <div class="form-option form-option--select">
-            <label class="quality-ui-label">Quality</label>
-            <select class="quality-ui"></select>
-          </div>
-          <div class="form-option form-option--select">
-            <label class="sky-lighting-label">Sky Lighting</label>
-            <select class="sky-lighting"></select>
-          </div>
-          <div class="form-option form-option--select">
-            <label class="scaleFactor-label">Scale</label>
-            <select class="scaleFactor"></select>
-          </div>
-          <div class="form-option form-option--checkbox">
-            <label class="auto-launch-label">Auto Fire</label>
-            <input class="auto-launch" type="checkbox" />
-          </div>
-          <div class="form-option form-option--checkbox form-option--finale-mode">
-            <label class="finale-mode-label">Finale Mode</label>
-            <input class="finale-mode" type="checkbox" />
-          </div>
-          <div class="form-option form-option--checkbox">
-            <label class="hide-controls-label">Hide Controls</label>
-            <input class="hide-controls" type="checkbox" />
-          </div>
-          <div class="form-option form-option--checkbox form-option--fullscreen">
-            <label class="fullscreen-label">Fullscreen</label>
-            <input class="fullscreen" type="checkbox" />
-          </div>
-          <div class="form-option form-option--checkbox">
-            <label class="long-exposure-label">Open Shutter</label>
-            <input class="long-exposure" type="checkbox" />
-          </div>
-        </form>
-        <div class="credits">
-          Passionately built by <a href="https://cmiller.tech/" target="_blank">Caleb Miller</a>.
-        </div>
-      </div>
-    </div>
-    <div class="help-modal">
-      <div class="help-modal__overlay"></div>
-      <div class="help-modal__dialog">
-        <div class="help-modal__header"></div>
-        <div class="help-modal__body"></div>
-        <button type="button" class="help-modal__close-btn">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div style="height: 0; width: 0; position: absolute; visibility: hidden;">
-  <svg xmlns="http://www.w3.org/2000/svg">
-    <symbol id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
-    <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></symbol>
-    <symbol id="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
-    <symbol id="icon-settings" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12-.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69-.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></symbol>
-    <symbol id="icon-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
-    <symbol id="icon-sound-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></symbol>
-  </svg>
-</div>
-
-<script>
-// ----- BẮT ĐẦU NỘI DUNG CỦA FSCREEN@1.0.1.JS -----
-// (Nội dung của fscreen.js từ CDN)
-var fscreen = {
-  requestFullscreen: function (element) {
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen();
-    }
-  },
-  exitFullscreen: function () {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  },
-  onFullscreenChange: function (callback) {
-    document.addEventListener('fullscreenchange', callback);
-    document.addEventListener('mozfullscreenchange', callback);
-    document.addEventListener('webkitfullscreenchange', callback);
-    document.addEventListener('msfullscreenchange', callback);
-  },
-  offFullscreenChange: function (callback) {
-    document.removeEventListener('fullscreenchange', callback);
-    document.removeEventListener('mozfullscreenchange', callback);
-    document.removeEventListener('webkitfullscreenchange', callback);
-    document.removeEventListener('msfullscreenchange', callback);
-  },
-  onFullscreenError: function (callback) {
-    document.addEventListener('fullscreenerror', callback);
-    document.addEventListener('mozfullscreenerror', callback);
-    document.addEventListener('webkitfullscreenerror', callback);
-    document.addEventListener('msfullscreenerror', callback);
-  },
-  offFullscreenError: function (callback) {
-    document.removeEventListener('fullscreenerror', callback);
-    document.removeEventListener('mozfullscreenerror', callback);
-    document.removeEventListener('webkitfullscreenerror', callback);
-    document.removeEventListener('msfullscreenerror', callback);
-  },
-  isFullscreen: function () {
-    return document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-  },
-  element: function () {
-    return document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-  },
-  enabled: function () {
-    return document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled || document.msFullscreenEnabled;
-  }
-};
-// ----- KẾT THÚC NỘI DUNG CỦA FSCREEN@1.0.1.JS -----
-
-// ----- BẮT ĐẦU NỘI DUNG CỦA STAGE@0.1.4.JS -----
-// (Nội dung của Stage.js từ CDN)
-var Stage = function (container) {
-  this.container = container;
-  this.canvas = document.createElement('canvas');
-  this.ctx = this.canvas.getContext('2d');
-  this.width = 0;
-  this.height = 0;
-  this.resize = this.resize.bind(this);
-  this.init();
-};
-
-Stage.prototype.init = function () {
-  this.container.appendChild(this.canvas);
-  window.addEventListener('resize', this.resize);
-  this.resize();
-};
-
-Stage.prototype.resize = function () {
-  this.width = this.container.offsetWidth;
-  this.height = this.container.offsetHeight;
-  this.canvas.width = this.width;
-  this.canvas.height = this.height;
-};
-
-Stage.prototype.clear = function () {
-  this.ctx.clearRect(0, 0, this.width, this.height);
-};
-
-Stage.prototype.destroy = function () {
-  window.removeEventListener('resize', this.resize);
-  this.container.removeChild(this.canvas);
-};
-// ----- KẾT THÚC NỘI DUNG CỦA STAGE@0.1.4.JS -----
-
-// ----- BẮT ĐẦU NỘI DUNG CỦA MYMATH.JS -----
-// (Nội dung của MyMath.js từ CDN)
-var MyMath = {
-  random: function (min, max) {
-    return Math.random() * (max - min) + min;
-  },
-  randomInt: function (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  },
-  randomColor: function () {
-    var r = MyMath.randomInt(0, 255);
-    var g = MyMath.randomInt(0, 255);
-    var b = MyMath.randomInt(0, 255);
-    return 'rgb(' + r + ',' + g + ',' + b + ')';
-  },
-  toRadian: function (angle) {
-    return angle * Math.PI / 180;
-  },
-  toDegree: function (radian) {
-    return radian * 180 / Math.PI;
-  }
-};
-// ----- KẾT THÚC NỘI DUNG CỦA MYMATH.JS -----
-
-// ----- BẮT ĐẦU NỘI DUNG CỦA SCRIPT.JS (pháo hoa chính) -----
-// (Nội dung chính của script.js từ CodePen)
-(function () {
-  'use strict';
-
-  var QUALITY_LOW = 1;
-  var QUALITY_MEDIUM = 2;
-  var QUALITY_HIGH = 3;
-  var QUALITY_EXTREME = 4;
-  
-  // Helper functions
-  var toRadians = MyMath.toRadian;
-  var random = MyMath.random;
-  var randomInt = MyMath.randomInt;
-
-  // Shell properties
-  var SHELL_TYPES = [
-    'spark',
-    'circle',
-    'fireworks',
-    'comet'
-  ];
-  var SHELL_SIZES = [
-    'small',
-    'medium',
-    'large',
-    'xlarge'
-  ];
-
-  // Shell constructor
-  function Shell (options) {
-    options = options || {};
-    this.x = options.x || 0;
-    this.y = options.y || 0;
-    this.vx = options.vx || 0;
-    this.vy = options.vy || 0;
-    this.color = options.color || MyMath.randomColor();
-    this.type = options.type || SHELL_TYPES[randomInt(0, SHELL_TYPES.length - 1)];
-    this.size = options.size || SHELL_SIZES[randomInt(0, SHELL_SIZES.length - 1)];
-    this.life = options.life || randomInt(30, 60);
-    this.particles = [];
-    this.exploded = false;
-
-    // Based on shell size
-    switch (this.size) {
-      case 'small':
-        this.radius = random(1, 2);
-        this.gravity = 0.05;
-        this.friction = 0.98;
-        this.drag = 0.9;
-        break;
-      case 'medium':
-        this.radius = random(2, 3);
-        this.gravity = 0.08;
-        this.friction = 0.97;
-        this.drag = 0.8;
-        break;
-      case 'large':
-        this.radius = random(3, 4);
-        this.gravity = 0.1;
-        this.friction = 0.96;
-        this.drag = 0.7;
-        break;
-      case 'xlarge':
-        this.radius = random(4, 5);
-        this.gravity = 0.12;
-        this.friction = 0.95;
-        this.drag = 0.6;
-        break;
-    }
-    // Based on shell type
-    switch (this.type) {
-      case 'spark':
-        this.maxParticles = randomInt(50, 100);
-        this.particleLife = randomInt(20, 40);
-        this.particleSize = random(1, 2);
-        this.particleSpeed = random(1, 3);
-        break;
-      case 'circle':
-        this.maxParticles = randomInt(80, 150);
-        this.particleLife = randomInt(30, 50);
-        this.particleSize = random(1, 3);
-        this.particleSpeed = random(2, 4);
-        break;
-      case 'fireworks':
-        this.maxParticles = randomInt(100, 200);
-        this.particleLife = randomInt(40, 60);
-        this.particleSize = random(1, 4);
-        this.particleSpeed = random(3, 5);
-        break;
-      case 'comet':
-        this.maxParticles = randomInt(30, 60);
-        this.particleLife = randomInt(15, 30);
-        this.particleSize = random(1, 2);
-        this.particleSpeed = random(0.5, 1.5);
-        break;
-    }
-  }
-
-  Shell.prototype.update = function () {
-    if (this.exploded) {
-      this.particles.forEach(function (particle) {
-        particle.update();
-      });
-      this.particles = this.particles.filter(function (particle) {
-        return particle.life > 0;
-      });
-    } else {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.vy += this.gravity;
-      this.vx *= this.drag;
-      this.life--;
-      if (this.life <= 0) {
-        this.explode();
-      }
-    }
-  };
-
-  Shell.prototype.draw = function (ctx) {
-    if (this.exploded) {
-      this.particles.forEach(function (particle) {
-        particle.draw(ctx);
-      });
-    } else {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.color;
-      ctx.fill();
-      ctx.closePath();
-    }
-  };
-
-  Shell.prototype.explode = function () {
-    this.exploded = true;
-    for (var i = 0; i < this.maxParticles; i++) {
-      this.particles.push(new Particle({
-        x: this.x,
-        y: this.y,
-        color: this.color,
-        life: this.particleLife,
-        size: this.particleSize,
-        speed: this.particleSpeed
-      }));
-    }
-  };
-
-  // Particle constructor
-  function Particle (options) {
-    options = options || {};
-    this.x = options.x || 0;
-    this.y = options.y || 0;
-    this.color = options.color || '#fff';
-    this.life = options.
+</body>
+</html>
